@@ -1,0 +1,42 @@
+
+name: Build SURYA RECORDER APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'SURYA_RECORDER_SOURCE_ONLY.zip'
+      - '.github/workflows/build-apk.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Extract Android project
+        run: unzip -q SURYA_RECORDER_SOURCE_ONLY.zip
+
+      - name: Build debug APK
+        working-directory: SURYA_RECORDER
+        run: gradle assembleDebug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SURYA-RECORDER-debug-apk
+          path: SURYA_RECORDER/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
